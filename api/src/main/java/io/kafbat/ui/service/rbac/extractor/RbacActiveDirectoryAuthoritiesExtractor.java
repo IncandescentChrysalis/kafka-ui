@@ -1,6 +1,7 @@
 package io.kafbat.ui.service.rbac.extractor;
 
 import io.kafbat.ui.model.rbac.Role;
+import io.kafbat.ui.model.rbac.Subject;
 import io.kafbat.ui.model.rbac.provider.Provider;
 import io.kafbat.ui.service.rbac.AccessControlService;
 import java.util.Collection;
@@ -30,6 +31,15 @@ public class RbacActiveDirectoryAuthoritiesExtractor implements LdapAuthoritiesP
         .map(GrantedAuthority::getAuthority)
         .peek(group -> log.trace("Found AD group [{}] for user [{}]", group, username))
         .collect(Collectors.toSet());
+
+    acs.getRoles()
+        .stream()
+        .peek(role -> log.trace("Debug found role [{}]", role))
+        .filter(r -> r.getSubjects()
+            .stream()
+            .peek(subject -> log.trace("Debug found subject [{}] of type [{}]", subject.getValue(), subject.getType()))
+            .anyMatch(subject -> true)
+        );
 
     return acs.getRoles()
         .stream()
